@@ -1,0 +1,132 @@
+
+<div id="ml-tree"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+const C={
+  root:          {f:'#D3D1C7',s:'#5F5E5A',t:'#444441',l:'#888780'},
+  Supervised:    {f:'#EEEDFE',s:'#534AB7',t:'#3C3489',l:'#7F77DD'},
+  Unsupervised:  {f:'#E1F5EE',s:'#1D9E75',t:'#085041',l:'#1D9E75'},
+  SemiSup:       {f:'#E6F1FB',s:'#185FA5',t:'#0C447C',l:'#378ADD'},
+  SelfSup:       {f:'#FAECE7',s:'#993C1D',t:'#712B13',l:'#D85A30'},
+  RL:            {f:'#FAEEDA',s:'#854F0B',t:'#412402',l:'#BA7517'},
+  Active:        {f:'#EAF3DE',s:'#3B6D11',t:'#27500A',l:'#639922'},
+  Meta:          {f:'#FBEAF0',s:'#993556',t:'#72243E',l:'#D4537E'},
+};
+
+const data={name:'Machine Learning',_k:'root',children:[
+  {name:'Supervised',_k:'Supervised',_q:'What are the subtypes of supervised learning and algorithms for each?',children:[
+    {name:'Regression',      _a:'Linear · Ridge · Lasso · ElasticNet · SVR'},
+    {name:'Classification',  _a:'Binary · Multi-class · Multi-label'},
+    {name:'Ranking',         _a:'Pointwise · Pairwise · Listwise'},
+  ]},
+  {name:'Unsupervised',_k:'Unsupervised',_q:'What are the subtypes of unsupervised learning?',children:[
+    {name:'Clustering',               _a:'K-Means · DBSCAN · HDBSCAN · GMM'},
+    {name:'Dimensionality Reduction', _a:'PCA · t-SNE · UMAP · LDA · ICA'},
+    {name:'Generative Modeling',      _a:'VAE · GAN · Diffusion Models'},
+    {name:'Association Rules',        _a:'Apriori · FP-Growth'},
+    {name:'Anomaly Detection',        _a:'Isolation Forest · One-Class SVM · LOF'},
+  ]},
+  {name:'Semi-Supervised',_k:'SemiSup',_q:'Explain the methods in semi-supervised learning',children:[
+    {name:'Self-Training'},
+    {name:'Co-Training'},
+    {name:'Label Propagation'},
+    {name:'Graph-Based Methods'},
+  ]},
+  {name:'Self-Supervised',_k:'SelfSup',_q:'What are the types of self-supervised learning?',children:[
+    {name:'Contrastive Learning',  _a:'SimCLR · MoCo · CLIP'},
+    {name:'Masked Prediction',     _a:'BERT (masked LM) · MAE'},
+    {name:'Next Token Prediction', _a:'GPT-style (causal LM)'},
+  ]},
+  {name:'Reinforcement',_k:'RL',_q:'What are the main types of reinforcement learning?',children:[
+    {name:'Model-Free',  _a:'Q-Learning · DQN · PPO · SAC · A3C'},
+    {name:'Model-Based', _a:'Dyna-Q · AlphaZero'},
+    {name:'Inverse RL'},
+    {name:'Multi-Agent RL'},
+  ]},
+  {name:'Active Learning',_k:'Active',_q:'How does active learning work and what are its types?',children:[
+    {name:'Uncertainty Sampling'},
+    {name:'Query by Committee'},
+    {name:'Expected Model Change'},
+  ]},
+  {name:'Meta Learning',_k:'Meta',_q:'What are the approaches to meta learning?',children:[
+    {name:'Few-Shot Learning'},
+    {name:'Zero-Shot Learning'},
+    {name:'MAML'},
+    {name:'Prototypical Networks'},
+  ]},
+]};
+
+const hr=d3.hierarchy(data);
+hr.each(d=>{
+  if(d.depth===0)d._k='root';
+  else if(d.depth===1)d._k=d.data._k;
+  else d._k=d.ancestors().find(a=>a.depth===1)?.data._k||'root';
+});
+
+const nL=hr.leaves().length;
+const TH=nL*40, TW=410, ML=76, MT=28;
+d3.tree().size([TH,TW])(hr);
+
+const svgH=TH+MT*2;
+const svg=d3.select('#ml-tree').append('svg')
+  .attr('width',680).attr('height',svgH).style('display','block');
+
+svg.append('style').text(`
+#ml-tree text{font-family:var(--font-sans,sans-serif)}
+.nd{cursor:default}
+@media(prefers-color-scheme:dark){
+.nroot rect{fill:#444441;stroke:#B4B2A9}.nroot text{fill:#D3D1C7}
+.nSupervised rect{fill:#26215C;stroke:#7F77DD}.nSupervised text{fill:#CECBF6}
+.nUnsupervised rect{fill:#04342C;stroke:#5DCAA5}.nUnsupervised text{fill:#9FE1CB}
+.nSemiSup rect{fill:#042C53;stroke:#85B7EB}.nSemiSup text{fill:#B5D4F4}
+.nSelfSup rect{fill:#4A1B0C;stroke:#F0997B}.nSelfSup text{fill:#F5C4B3}
+.nRL rect{fill:#412402;stroke:#EF9F27}.nRL text{fill:#FAC775}
+.nActive rect{fill:#173404;stroke:#97C459}.nActive text{fill:#C0DD97}
+.nMeta rect{fill:#4B1528;stroke:#ED93B1}.nMeta text{fill:#F4C0D1}
+}`);
+
+const g=svg.append('g').attr('transform',`translate(${ML},${MT})`);
+
+g.selectAll('path.lk').data(hr.links()).enter().append('path')
+  .attr('class','lk').attr('fill','none')
+  .attr('stroke',d=>C[d.target._k]?.l||'#888780')
+  .attr('stroke-width',0.8).attr('stroke-opacity',0.45)
+  .attr('d',d3.linkHorizontal().x(d=>d.y).y(d=>d.x));
+
+const nd=g.selectAll('g.nd').data(hr.descendants()).enter()
+  .append('g').attr('class',d=>'nd n'+d._k)
+  .attr('transform',d=>`translate(${d.y},${d.x})`);
+
+nd.each(function(d){
+  const el=d3.select(this);
+  const c=C[d._k]||C.root;
+  const nm=d.data.name;
+  const alg=d.data._a||'';
+
+  if(d.depth===0){
+    el.append('rect').attr('x',-58).attr('y',-16).attr('width',116).attr('height',32).attr('rx',16)
+      .attr('fill',c.f).attr('stroke',c.s).attr('stroke-width',1);
+    el.append('text').attr('text-anchor','middle').attr('dominant-baseline','central')
+      .attr('font-size',12).attr('font-weight',500).attr('fill',c.t).text(nm);
+  } else if(d.depth===1){
+    el.style('cursor','pointer').on('click',()=>sendPrompt(d.data._q));
+    el.append('rect').attr('x',-4).attr('y',-15).attr('width',110).attr('height',30).attr('rx',15)
+      .attr('fill',c.f).attr('stroke',c.s).attr('stroke-width',0.5);
+    el.append('text').attr('x',51).attr('dominant-baseline','central').attr('text-anchor','middle')
+      .attr('font-size',11).attr('font-weight',500).attr('fill',c.t).text(nm);
+  } else {
+    const hasA=alg.length>0;
+    const bh=hasA?36:24, bw=168;
+    el.append('rect').attr('x',-4).attr('y',-bh/2).attr('width',bw).attr('height',bh).attr('rx',5)
+      .attr('fill',c.f).attr('stroke',c.s).attr('stroke-width',0.5);
+    el.append('text').attr('x',bw/2-4).attr('y',hasA?-8:0)
+      .attr('text-anchor','middle').attr('dominant-baseline','central')
+      .attr('font-size',11).attr('font-weight',500).attr('fill',c.t).text(nm);
+    if(hasA){
+      el.append('text').attr('x',bw/2-4).attr('y',9)
+        .attr('text-anchor','middle').attr('dominant-baseline','central')
+        .attr('font-size',9).attr('fill',c.s).text(alg);
+    }
+  }
+});
+</script>
