@@ -9,24 +9,29 @@ st.set_page_config(page_title="Gradient Descent Visualizer", layout="wide")
 st.title("📉 Gradient Descent Visualizer (Interactive)")
 
 # ---------------- EXPLANATION ----------------
-with st.expander("📘 What is Gradient Descent? (Hinglish Explanation)"):
+with st.expander("📘 What is Gradient Descent? (Simple Explanation)"):
     st.write("""
-    Gradient Descent ek optimization algorithm hai jo model ke error (loss) ko minimize karta hai.
+    Gradient Descent is an optimization algorithm used in machine learning 
+    to minimize the error (loss) of a model.
 
-    👉 Simple samjho:
-    Tum ek pahadi ke upar khade ho aur neeche valley tak jaana hai.
-    Har step pe tum slope dekhte ho aur neeche ki taraf move karte ho.
+    In simple terms:
+    It helps the model find the best values for its parameters (like slope and intercept)
+    so that predictions become as accurate as possible.
 
-    👉 ML me:
-    - Gradient = slope (error ka direction)
-    - Descent = neeche jaana (error kam karna)
+    Imagine you are standing on top of a hill and want to reach the lowest point.
+    You take steps in the direction that goes downward.
+
+    Similarly, Gradient Descent:
+    - Calculates the slope (gradient) of the error
+    - Moves in the opposite direction
+    - Repeats this process until the error is minimized
 
     Formula:
-    New Weight = Old Weight - Learning Rate × Gradient
+    New Value = Old Value − Learning Rate × Gradient
 
-    🔥 Goal: Loss ko minimum karna
+    Goal:
+    To reach the minimum error (best fit line)
     """)
-
 # ---------------- CONTROLS ----------------
 st.sidebar.header("⚙️ Controls")
 
