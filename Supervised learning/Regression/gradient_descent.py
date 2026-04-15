@@ -11,6 +11,9 @@ st.title("📉 Gradient Descent Visualizer (Interactive)")
 # ---------------- EXPLANATION ----------------
 with st.expander("📘 What is Gradient Descent? (Simple Explanation)"):
     st.write("""
+             
+    YouTube: "Gradient Descent is like finding the lowest point in a valley by taking steps downhill."
+    https://youtube.com/shorts/yvovi_CexEY?si=ImnmqMMyiz3bB0O8
     Gradient Descent is an optimization algorithm used in machine learning 
     to minimize the error (loss) of a model.
 
